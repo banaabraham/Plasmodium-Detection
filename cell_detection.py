@@ -1,9 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Apr 18 16:37:11 2019
-
-@author: lenovo
-"""
 from sklearn.cluster import KMeans
 from skimage.feature import greycomatrix, greycoprops
 import cv2
@@ -20,11 +14,10 @@ model = models.load_model('cell_class_v3.h5') #load training model
 plot_model(model, to_file='model.png')
 
 
-d = "Deteksi Parasit-20190418T085731Z-001\\Deteksi Parasit\\Data\\2.png"
+d = "input image directory"
 img = cv2.imread(d)
 img = cv2.cvtColor(img,cv2.COLOR_BGR2RGB)
 img_gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
-
 
 
 def sliding_window(image, stepSize, windowSize):
@@ -85,13 +78,9 @@ if len(centroids)>1:
         for (x,y,w,h) in verticles:
             glcm = greycomatrix(img_gray[y:h,x:w], [6], [0], 256, symmetric=True, normed=True)
             
-            features.append([#greycoprops(glcm, 'dissimilarity')[0, 0],
-                             #greycoprops(glcm, 'correlation')[0, 0],
-                             #greycoprops(glcm, 'contrast')[0, 0],
-                             greycoprops(glcm, 'homogeneity')[0, 0],
+            features.append([greycoprops(glcm, 'homogeneity')[0, 0],
                              greycoprops(glcm, 'energy')[0, 0]])
 
-        
         k, sil = 0, 0
         if len(verticles)>3:
             for i in range(2,4):
@@ -155,32 +144,6 @@ cv2.imwrite("hasil/two.jpg",img)
 cv2.imshow("siap",cv2.resize(img,(854,480)))
 cv2.waitKey(0)
 cv2.destroyAllWindows()
-
-
-fitur = np.array(features)
-"""
-LABEL_COLOR_MAP = {0 : 'b',
-                   1 : 'b',
-                   2 : 'b'}
-
-#kmeans = KMeans(n_clusters=3, random_state=0).fit(fitur)
-#labels = kmeans.labels_
-
-spectral = AgglomerativeClustering(n_clusters=3).fit(fitur)
-labels = spectral.labels_
-
-label_color = [LABEL_COLOR_MAP[l] for l in labels]
-
-labels = [0,1]
-LABEL_COLOR_MAP = {0 : 'r',
-                   1 : 'g',
-                   2 : 'b'}
-label_color = [LABEL_COLOR_MAP[l] for l in labels]
-plt.xlabel('homogeneity', fontsize=18)
-plt.ylabel('energy', fontsize=16)
-plt.scatter(fitur[:,0], fitur[:,1] , c=label_color)
-
-"""
 
 
 
