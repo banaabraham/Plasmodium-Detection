@@ -1,34 +1,15 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Apr 18 17:43:39 2019
 
-@author: lenovo
-"""
 import keras
-from keras.layers import Dense, Conv2D, BatchNormalization, Activation
-from keras.layers import AveragePooling2D, Input, Flatten
 from keras.optimizers import Adam
-from keras.callbacks import ModelCheckpoint, LearningRateScheduler
-from keras.callbacks import ReduceLROnPlateau
 from keras.preprocessing.image import ImageDataGenerator
-from keras.regularizers import l2
-from keras import backend as K
 from keras.models import Model
-from keras.datasets import cifar10
 import cv2
 import numpy as np
 import pandas as pd
 from keras import layers
 from keras import models
-from keras.optimizers import RMSprop
-from keras.preprocessing.image import ImageDataGenerator, array_to_img, img_to_array, load_img
-from keras import backend as K
 import os
-from keras.models import Sequential
-from keras.layers.core import Flatten, Dense, Dropout
-from keras.layers.convolutional import Convolution2D, MaxPooling2D, ZeroPadding2D
-from skimage.color import convert_colorspace
-import random
+
 
 def create_model():
     model = models.Sequential()
