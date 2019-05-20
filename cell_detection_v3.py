@@ -16,7 +16,7 @@ from keras.utils import plot_model
 from sklearn import metrics
 
 
-model = models.load_model('cell_class_v3.h5')
+model = models.load_model('cell_class_v3.h5') #load training model 
 plot_model(model, to_file='model.png')
 
 
