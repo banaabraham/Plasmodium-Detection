@@ -114,7 +114,8 @@ if len(centroids)>1:
             else:
                 labels = [0]
         
-        choice = 0
+	
+        choice = 0 #choice the cluster that contains the plasmodium
         
         filtered_verticles = []
         
@@ -139,7 +140,11 @@ for (x, y, w, h) in filtered_verticles:
     cv2.rectangle(img, (x, y), (w, h), (255, 0, 0), 2)
 
 #cv2.imwrite("hasil/"+d.split("\\")[-1],img)
-cv2.imwrite("hasil/two.jpg",img)
+
+fitur = np.array(features)
+plt.xlabel('homogeneity', fontsize=18)
+plt.ylabel('energy', fontsize=16)
+plt.scatter(fitur[:,0], fitur[:,1] , c=label_color)
 
 cv2.imshow("siap",cv2.resize(img,(854,480)))
 cv2.waitKey(0)
