@@ -3,18 +3,16 @@ from skimage.feature import greycomatrix, greycoprops
 import cv2
 import matplotlib.pyplot as plt
 import numpy as np
-from skimage.transform import pyramid_gaussian
 from keras import models
 from sklearn.cluster import MeanShift
 from keras.utils import plot_model
 from sklearn import metrics
 
-
-model = models.load_model('cell_class_v3.h5') #load training model 
+model = models.load_model('cell_class_v3.h5')
 plot_model(model, to_file='model.png')
 
 
-d = "input image directory"
+d = "Deteksi Parasit-20190418T085731Z-001\\Deteksi Parasit\\Data\\2.png"
 img = cv2.imread(d)
 img = cv2.cvtColor(img,cv2.COLOR_BGR2RGB)
 img_gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
@@ -77,10 +75,14 @@ if len(centroids)>1:
         features = []
         for (x,y,w,h) in verticles:
             glcm = greycomatrix(img_gray[y:h,x:w], [6], [0], 256, symmetric=True, normed=True)
-            
-            features.append([greycoprops(glcm, 'homogeneity')[0, 0],
+            features.append([#greycoprops(glcm, 'dissimilarity')[0, 0],
+                             #greycoprops(glcm, 'correlation')[0, 0],
+                             #greycoprops(glcm, 'contrast')[0, 0],
+                             greycoprops(glcm, 'homogeneity')[0, 0],
                              greycoprops(glcm, 'energy')[0, 0]])
+          
 
+        
         k, sil = 0, 0
         if len(verticles)>3:
             for i in range(2,4):
@@ -114,8 +116,18 @@ if len(centroids)>1:
             else:
                 labels = [0]
         
-	
-        choice = 0 #choice the cluster that contains the plasmodium
+        choice = 0
+        min_hom = 1000
+        if len(labels)>2:
+            for i in labels:
+                if min_hom > kmeans.cluster_centers_[i,1]:
+                    min_hom = kmeans.cluster_centers_[i,1]
+                    choice = i
+        else:
+            if features[0][1]>features[1][1]:
+                choice = 1
+            else:
+                choice = 0
         
         filtered_verticles = []
         
@@ -140,15 +152,24 @@ for (x, y, w, h) in filtered_verticles:
     cv2.rectangle(img, (x, y), (w, h), (255, 0, 0), 2)
 
 #cv2.imwrite("hasil/"+d.split("\\")[-1],img)
-
-fitur = np.array(features)
-plt.xlabel('homogeneity', fontsize=18)
-plt.ylabel('energy', fontsize=16)
-plt.scatter(fitur[:,0], fitur[:,1] , c=label_color)
+cv2.imwrite("hasil/two.jpg",img)
 
 cv2.imshow("siap",cv2.resize(img,(854,480)))
 cv2.waitKey(0)
 cv2.destroyAllWindows()
 
 
+fitur = np.array(features)
+
+#kmeans = KMeans(n_clusters=3, random_state=0).fit(fitur)
+#labels = kmeans.labels_
+
+
+LABEL_COLOR_MAP = {0 : 'r',
+                   1 : 'g',
+                   2 : 'b'}
+label_color = [LABEL_COLOR_MAP[l] for l in labels]
+plt.xlabel('homogeneity', fontsize=18)
+plt.ylabel('energy', fontsize=16)
+plt.scatter(fitur[:,0], fitur[:,1] , c=label_color)
 
