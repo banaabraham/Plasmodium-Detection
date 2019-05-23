@@ -3,19 +3,24 @@ from skimage.feature import greycomatrix, greycoprops
 import cv2
 import matplotlib.pyplot as plt
 import numpy as np
+from skimage.transform import pyramid_gaussian
 from keras import models
 from sklearn.cluster import MeanShift
 from keras.utils import plot_model
 from sklearn import metrics
+from sklearn.preprocessing import StandardScaler
 
 model = models.load_model('cell_class_v3.h5')
 plot_model(model, to_file='model.png')
 
 
-d = "Deteksi Parasit-20190418T085731Z-001\\Deteksi Parasit\\Data\\2.png"
+d = "Deteksi Parasit-20190418T085731Z-001\\Deteksi Parasit\\Data\\26.png"
 img = cv2.imread(d)
 img = cv2.cvtColor(img,cv2.COLOR_BGR2RGB)
 img_gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+
+sil_thres = 0.4
+distance_thres = 0.07
 
 
 def sliding_window(image, stepSize, windowSize):
@@ -29,7 +34,7 @@ def sliding_window(image, stepSize, windowSize):
 
 detected = []
 scores = []
-for (x, y, window) in sliding_window(img, stepSize=35, windowSize=(winW, winH)):
+for (x, y, window) in sliding_window(img, stepSize=40, windowSize=(winW, winH)):
     if img.shape[0] < 100 or img.shape[1] < 100:
         break
     c = cv2.resize(window,(100,100))/255
@@ -94,7 +99,7 @@ if len(centroids)>1:
                     sil = sil_score
                     k = i
             
-            if sil<0.5:
+            if sil<sil_thres:
                 labels = [0 for i in range(len(verticles))]
             else:
                 kmeans = KMeans(n_clusters=k, random_state=0).fit(features)
@@ -104,12 +109,12 @@ if len(centroids)>1:
                 kmeans = KMeans(n_clusters=2, random_state=0).fit(features)
                 labels = list(kmeans.labels_)
                 sil_score = metrics.silhouette_score(features, labels, metric='euclidean')
-                if sil_score<0.5:
+                if sil_score<sil_thres:
                     labels = [0 for i in range(len(verticles))]
                     
             elif len(verticles) == 2:
                 dist = np.linalg.norm(np.array(features[1])-np.array(features[0]))
-                if dist<0.07:
+                if dist<distance_thres:
                     labels = [0 for i in range(len(verticles))]
                 else:
                     labels = [0,1]
@@ -154,10 +159,6 @@ for (x, y, w, h) in filtered_verticles:
 #cv2.imwrite("hasil/"+d.split("\\")[-1],img)
 cv2.imwrite("hasil/two.jpg",img)
 
-cv2.imshow("siap",cv2.resize(img,(854,480)))
-cv2.waitKey(0)
-cv2.destroyAllWindows()
-
 
 fitur = np.array(features)
 
@@ -173,3 +174,6 @@ plt.xlabel('homogeneity', fontsize=18)
 plt.ylabel('energy', fontsize=16)
 plt.scatter(fitur[:,0], fitur[:,1] , c=label_color)
 
+cv2.imshow("siap",cv2.resize(img,(854,480)))
+cv2.waitKey(0)
+cv2.destroyAllWindows()
